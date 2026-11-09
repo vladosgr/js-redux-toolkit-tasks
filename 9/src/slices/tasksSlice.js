@@ -13,5 +13,25 @@ export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
 });
 
 // BEGIN (write your solution here)
-
+export const addTask = createAsyncThunk("tasks/addTask", async (name) => {
+  const response = await axios.post(routes.tasksPath(), { name });
+  return response.data;
+});
+export const removeTask = createAsyncThunk("tasks/removeTask", async (id) => {
+  await axios.delete(routes.taskPath(id));
+  return id;
+});
+const tasksAdapter = createEntityAdapter();
+const tasksSlice = createSlice({
+  name: "tasks",
+  initialState: tasksAdapter.getInitialState(),
+  extraReducers: (builder) => {
+    builder
+      .addCase(addTask.fulfilled, tasksAdapter.addOne)
+      .addCase(removeTask.fulfilled, tasksAdapter.removeOne)
+      .addCase(fetchTasks.fulfilled, tasksAdapter.addMany);
+  },
+});
+export const selectors = tasksAdapter.getSelectors((state) => state.tasks);
+export default tasksSlice.reducer;
 // END
